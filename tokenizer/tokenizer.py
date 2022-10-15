@@ -30,4 +30,5 @@ def generate_tokens(lexemes: string, line: int):
 def tokenize():
     code = open("tokenizer/code.txt", 'r')
     for i, lexemes in enumerate(code):
-        generate_tokens(lexemes, i + 1)
+        if not lexemes.strip().startswith('*'):
+            generate_tokens(lexemes, i + 1)
