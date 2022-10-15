@@ -3,7 +3,7 @@ class Token:
 
     def symbol_table(self):
         print('-' * 55)
-        print("Symbol Table".center(55))
+        print("Symbol Table".center(53))
         print('-' * 55)
         print("Line Number".ljust(20), "Lexemes".ljust(20), "Tokens".ljust(20))
         print('-' * 55)
