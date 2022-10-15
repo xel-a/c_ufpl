@@ -9,5 +9,5 @@
 - <b>structure.py</b> - contains the program strucure
 - <b>tokenizer.py</b> - generates tokens<br/></br>
 
-The syntax_analyzer package does not have files yet xD
-- I'll try it as soon as I know how hehe
+The syntax_analyzer package isn't finished yet xD
+- I'll try do it as soon as I know how hehe
