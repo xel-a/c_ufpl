@@ -10,4 +10,4 @@
 - <b>tokenizer.py</b> - generates tokens<br/></br>
 
 The syntax_analyzer package isn't finished yet xD
-- I'll try do it as soon as I know how hehe
+- I'll try to do it as soon as I know how hehe
