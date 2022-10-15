@@ -1,5 +1,5 @@
-from c_ufpl.tokenizer.gen_tokens import *
-from c_ufpl.tokenizer import tokenizer
+from tokenizer.gen_tokens import *
+from tokenizer import tokenizer
 
 class Parse:
     tokens = []

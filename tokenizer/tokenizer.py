@@ -1,7 +1,7 @@
 # I was dumb enough to use word_tokenize but later used regexp_tokenize instead because it has regex :p
 from nltk import regexp_tokenize as tk
-from c_ufpl.tokenizer import gen_tokens
-from c_ufpl.tokenizer import structure
+from tokenizer import gen_tokens
+from tokenizer import structure
 import string
 
 
