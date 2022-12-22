@@ -12,4 +12,4 @@ if __name__ == "__main__":
         if res:
             print(res)
         else:
-            print('Compile successful.')
+            print('Build successful.')
