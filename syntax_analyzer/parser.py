@@ -40,6 +40,18 @@ class Parser:
                                 if self.tokens[self.current_index + 1].get('value') == TT_INT:
                                     self.next()
                                     self.next()
+                                elif self.tokens[self.current_index + 1].get('value') == TT_FLOAT:
+                                    self.next()
+                                    self.next()
+                                elif self.tokens[self.current_index + 1].get('value') == TT_STRING:
+                                    self.next()
+                                    self.next()
+                                elif self.tokens[self.current_index + 1].get('value') == TT_CHAR:
+                                    self.next()
+                                    self.next()
+                                elif self.tokens[self.current_index + 1].get('value') == TT_BOOL:
+                                    self.next()
+                                    self.next()
                                 else:
                                     return None, InvalidSyntaxError(self.current_token.get('line'),
                                                                     self.current_token.get('type')).to_string()

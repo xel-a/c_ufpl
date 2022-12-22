@@ -1,4 +1,3 @@
-import copy # to create a copy of the abstrace syntax tree
 from tokenizer.tokenizer import *
 from syntax_analyzer.parser import *
 
