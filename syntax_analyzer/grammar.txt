@@ -1,0 +1,10 @@
+<program> ::= <block> | null
+<block> ::= <decls> <stmts> | <stmts>
+<decls> ::= <decls> <decl> | null
+<decl> ::= <type> <id> | <id> AS <type>
+
+
+<expr> ::= <expr> + <term> | <expr> - <term> | <term>
+<term> ::= <term> * <unary> | <term> / <unary> | <unary>
+<unary> ::= <positive> | <negative> | <factor>
+<factor> ::= <integer> | <float> | <id>
