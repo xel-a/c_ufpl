@@ -1,34 +1,205 @@
-# I was dumb enough to use word_tokenize but later used regexp_tokenize instead because it has regex :p
-from nltk import regexp_tokenize as tk
-from tokenizer import gen_tokens
-from tokenizer import structure
-import string
+import re  # for regular expressions
+from tokenizer.structure import *
+from error.error import *
 
 
-# this generates tokens and takes in lexemes and line number as paramters
-def generate_tokens(lexemes: string, line: int):
-    tokenizer = gen_tokens.Token()
-    # I used this regex pattern to ignore spaces whilst matching the rest :3
-    for lex in tk(lexemes, pattern="[-+]?[0-9]*\.?[0-9]+|[<=>]+|\w+|[#&[\](){}'\",:+\-*/<>=.]"):
-        if lex.upper() in structure.operators.keys():
-            tokenizer.tokens.append({line: {lex: structure.operators[lex]}})
-        elif lex.upper() in structure.keywords:
-            tokenizer.tokens.append({line: {lex: "KEYWORD"}})
-        elif lex.isdigit():
-            tokenizer.tokens.append({line: {lex: "INTEGER"}})
-        elif lex.upper() in structure.separators:
-            tokenizer.tokens.append({line: {lex: "SEPARATOR"}})
+class Tokenizer:
+    def __init__(self):
+        self.tokens = []
+
+    def add_token(self, line, datatype, value = None):
+        if not value: self.tokens.append({
+            "line": line,
+            "type": datatype
+        })
         else:
-            try:  # trying to catch a wild float :3
-                float(lex)
-                tokenizer.tokens.append({line: {lex: "FLOAT"}})
-            except ValueError:
-                tokenizer.tokens.append({line: {lex: "IDENTIFIER"}})
+            self.tokens.append({
+            "line": line,
+            "type": datatype,
+            "value": value
+        })
 
+    def tokenize(self, input_expression):
+        current_index = 0
+        line_no = 1
+        alphabet = re.compile(r"[a-z_0-9]", re.I)  # matching alphabets
+        numbers = re.compile(r"[0-9.]")  # matching numbers
+        white_space = re.compile(r"\s")  # matching whitespace
 
-# tokenizes the code snippet by line
-def tokenize():
-    code = open("tokenizer/code.txt", 'r')
-    for i, lexemes in enumerate(code):
-        if not lexemes.strip().startswith('*'):
-            generate_tokens(lexemes, i + 1)
+        while (current_index < len(input_expression)):
+            char = input_expression[current_index]
+
+            # Newline
+            if char == '\n':
+                line_no += 1
+                current_index += 1
+                continue
+
+            # Whitespace
+            elif re.match(white_space, char):
+                current_index += 1
+                continue
+
+            # Numbers
+            elif re.match(numbers, char):
+                dot_count = 0
+                is_float = False
+                value = ''
+                while re.match(numbers, char):
+                    if char == '.':
+                        is_float = True
+                        dot_count += 1
+                    value += char
+                    current_index += 1
+                    if current_index < len(input_expression):
+                        char = input_expression[current_index]
+                    else:
+                        break
+                if dot_count > 1:
+                    return InvalidSyntaxError(line_no, 'Multiple \'.\'')
+                if is_float:
+                    self.add_token(line_no, TT_FLOAT, value)
+                else:
+                    self.add_token(line_no, TT_INT, value)
+                continue
+
+            # Strings
+            elif re.match(alphabet, char):
+                value = ''
+                while re.match(alphabet, char):
+                    value += char
+                    current_index += 1
+                    if current_index < len(input_expression):
+                        char = input_expression[current_index]
+                    else:
+                        break
+                if f'KEY_{value}' in KEYWORDS:
+                    self.add_token(line_no, KEYWORDS[f'KEY_{value}'])
+                elif value in OPERATORS:
+                    self.add_token(line_no, OPERATORS[value])
+                else:
+                    self.add_token(line_no, TT_STRING, value)
+                continue
+
+            # SEPARATORS
+            elif char in SEPARATORS:
+                if char == '(':
+                    self.add_token(line_no, TT_LPAREN)
+                    current_index += 1
+                if char == ')':
+                    self.add_token(line_no, TT_RPAREN)
+                    current_index += 1
+                if char == '[':
+                    self.add_token(line_no, TT_LSQBRACK)
+                    current_index += 1
+                if char == ']':
+                    self.add_token(line_no, TT_RSQBRACK)
+                    current_index += 1
+                if char == '{':
+                    self.add_token(line_no, TT_LCURBRACK)
+                    current_index += 1
+                if char == '}':
+                    self.add_token(line_no, TT_RCURBRACK)
+                    current_index += 1
+                if char == '#':
+                    self.add_token(line_no, TT_SHARP)
+                    current_index += 1
+                if char == '&':
+                    self.add_token(line_no, TT_AMPERSAND)
+                    current_index += 1
+                if char == '\'':
+                    self.add_token(line_no, TT_SGLQUOTE)
+                    current_index += 1
+                if char == '"':
+                    self.add_token(line_no, TT_DBLQUOTE)
+                    current_index += 1
+                if char == ',':
+                    self.add_token(line_no, TT_COMMA)
+                    current_index += 1
+                if char == ':':
+                    self.add_token(line_no, TT_COLON)
+                    current_index += 1
+                if char == '.':
+                    self.add_token(line_no, TT_DOT)
+                    current_index += 1
+                continue
+
+            # OPERATORS
+            elif char in OPERATORS:
+                if char == '+':
+                    self.add_token(line_no, TT_PLUS)
+                    current_index += 1
+                if char == '-':
+                    self.add_token(line_no, TT_MINUS)
+                    current_index += 1
+                if char == '*':
+                    self.add_token(line_no, TT_MULT)
+                    current_index += 1
+                if char == '/':
+                    self.add_token(line_no, TT_DIV)
+                    current_index += 1
+                if char == '%':
+                    self.add_token(line_no, TT_MOD)
+                    current_index += 1
+                if char == '<':
+                    value = ''
+                    while re.match(r"[<>=]", char):
+                        value += char
+                        current_index += 1
+                        if current_index < len(input_expression):
+                            char = input_expression[current_index]
+                        else:
+                            break
+                    if value == '<>':
+                        self.add_token(line_no, OPERATORS[value], '<>')
+                    elif value == '<=':
+                        self.add_token(line_no, OPERATORS[value], '<=')
+                    else:
+                        self.add_token(line_no, OPERATORS[value], '<')
+                if char == '>':
+                    value = ''
+                    while re.match(r"[>=]", char):
+                        value += char
+                        current_index += 1
+
+                        if current_index < len(input_expression):
+                            char = input_expression[current_index]
+                        else:
+                            break
+                    if value == '>=':
+                        self.add_token(line_no, OPERATORS[value], '>=')
+                    else:
+                        self.add_token(line_no, OPERATORS[value], '>')
+                if char == '=':
+                    value = ''
+                    while re.match(r"=", char):
+                        value += char
+                        current_index += 1
+                        if current_index < len(input_expression):
+                            char = input_expression[current_index]
+                        else:
+                            break
+                    if value == '==':
+                        self.add_token(line_no, OPERATORS[value], '==')
+                    else:
+                        self.add_token(line_no, OPERATORS[value], '=')
+                continue
+            else:
+                return [], IllegalCharError(line_no, f'\'{char}\'').to_string()
+        return self.tokens, None
+
+    def symbol_table(self):
+        print('-' * 58)
+        print("Symbol Table".center(53))
+        print('-' * 58)
+        print("Line Number".ljust(20), "Lexemes".ljust(20), "Tokens".ljust(20))
+        print('-' * 58)
+        for token in self.tokens:
+            if not token.get('value'):
+                print("{}".format(token["line"]).ljust(20), "".ljust(20),
+                      "{}".format(token["type"]).ljust(20))
+                continue
+            print("{}".format(token["line"]).ljust(20), "{}".format(token["value"]).ljust(20),
+              "{}".format(token["type"]).ljust(20))
+        print('-' * 58)
+        print("Total Number of Tokens: {}".format(len(self.tokens)))

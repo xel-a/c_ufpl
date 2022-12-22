@@ -1,0 +1,6 @@
+* my first program in CFPL
+VAR abc, b AS INT
+START
+    abc=b=10
+    OUTPUT: abc & "hi" & b
+STOP
